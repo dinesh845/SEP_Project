@@ -1,0 +1,206 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  background: #f0fdf4;
+}
+
+.centered { 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  min-height: 100vh;
+  padding: 20px;
+}
+
+#auth-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Force auth container into the exact center of the viewport for the auth page */
+.centered#auth-container {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 0; /* let the auth-box control its own padding */
+  z-index: 1100;
+  min-height: auto;
+}
+
+.auth-box {
+  width: 100%;
+  background: #fff;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  text-align: center;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.auth-box.hidden {
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+}
+
+.auth-box h2 {
+  margin: 0 0 24px;
+  font-size: 24px;
+  color: #2c5530;
+}
+
+.auth-box input {
+  width: 100%;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.auth-box input:focus {
+  outline: none;
+  border-color: #4a7c59;
+  box-shadow: 0 0 0 3px rgba(74,124,89,0.1);
+}
+
+.auth-box p {
+  margin-top: 20px;
+  color: #666;
+}
+
+.auth-box a {
+  color: #2d6a4f;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-box a:hover {
+  text-decoration: underline;
+}
+
+/* Style the auth buttons specifically */
+.auth-box button {
+  margin-top: 8px;
+  background: #2d6a4f;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  padding: 14px;
+  transition: transform 0.15s, background 0.15s;
+}
+
+.auth-box button:hover {
+  background: #1b4332;
+  transform: translateY(-1px);
+}
+
+.auth-box button:active {
+  transform: translateY(0);
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #2d6a4f;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+button:hover { background: #1b4332; }
+
+.header { background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%); color: white; position: fixed; width: 100%; top: 0; height: 64px; }
+
+.nav-brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; }
+.nav-brand i { color: #fff; }
+.navbar { display: flex; align-items: center; justify-content: space-between; max-width: 1200px; margin: 0 auto; height: 100%; padding: 0 20px; }
+.nav-links { display: flex; gap: 14px; margin-left: auto; align-items: center; }
+/* link style: neat green, subtle pill hover */
+.nav-links a {
+  color: #ebfbef; /* light green text */
+  text-decoration: none; /* remove underline for cleaner look */
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 999px;
+  transition: background 0.15s, color 0.15s, transform 0.12s;
+}
+.nav-links a:hover {
+  background: rgba(255,255,255,0.06);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+.header { z-index: 1000; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+
+.hero { padding: 120px 20px 80px; text-align: center; background: linear-gradient(135deg, #e8f5e8, #c8e6c9); }
+
+/* make sure main content moves below fixed header */
+main, .hero, section, .feature-grid, .challenge-grid { margin-top: 12px; }
+body { padding-top: 72px; }
+
+.cta-button {
+  background: #4caf50;
+  color: white;
+  border-radius: 50px;
+  padding: 15px 30px;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.cta-button:hover { background: #388e3c; }
+
+.feature-grid, .challenge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 28px;
+  margin: 0 auto;
+  max-width: 1100px;
+  padding: 20px 32px;
+}
+
+/* Center section headings and center grid items */
+#features h2, #challenges h2 {
+  text-align: center;
+  font-size: 28px;
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+.feature-grid, .challenge-grid {
+  justify-items: center; /* center contents of each grid cell */
+}
+
+.card {
+  background: white;
+  padding: 36px 24px;
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+  text-align: center;
+  transition: transform 0.25s, box-shadow 0.25s;
+  min-height: 130px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.card:hover { transform: translateY(-6px); box-shadow: 0 14px 30px rgba(0,0,0,0.12); }
+
+.card i { font-size: 26px; display: block; margin-bottom: 14px; color: #111; }
+.card h3 { margin: 0; font-size: 20px; letter-spacing: 0.3px; }
+
+/* smaller screens adjustments */
+@media (max-width: 600px) {
+  .feature-grid, .challenge-grid { grid-template-columns: 1fr; max-width: 92%; }
+  .hero { padding-top: 140px; }
+  .header { padding: 0.8rem 1rem; }
+  /* revert fixed centering on small screens so auth flows naturally */
+  .centered#auth-container { position: static; transform: none; padding: 20px; }
+}

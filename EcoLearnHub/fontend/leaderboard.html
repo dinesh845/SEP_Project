@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoLearn Hub - Leaderboard</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="header">
+    <nav class="navbar">
+      <div class="nav-brand"><i class="fas fa-leaf"></i><span>EcoLearn Hub</span></div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="index.html#features">Features</a>
+        <a href="index.html#challenges">Challenges</a>
+        <a href="index.html#about">About</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="#" id="logoutLink">Logout</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-content">
+        <h1>🏆 EcoLearn Leaderboard</h1>
+        <p>Top players and eco-scores</p>
+      </div>
+    </section>
+
+    <section style="max-width:1000px;margin:24px auto;padding:0 20px;">
+      <div style="background:#fff;padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.06);">
+        <table id="leaderboard-table" style="width:100%;border-collapse:collapse;">
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Name</th>
+        <th>Score</th>
+        <th>Tokens</th>
+        <th>Badges</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Leaderboard rows will be added here by JS -->
+    </tbody>
+        </table>
+        <div style="text-align:center;margin-top:14px;">
+          <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function loadLeaderboard() {
+      const users = JSON.parse(localStorage.getItem("users")) || [];
+      const tbody = document.querySelector("#leaderboard-table tbody");
+      if (users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="padding:12px;text-align:center;">No users yet!</td></tr>';
+        return;
+      }
+
+      // Sort users by score descending
+      users.sort((a, b) => (b.score || 0) - (a.score || 0));
+
+      tbody.innerHTML = '';
+      users.forEach((user, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="padding:12px;text-align:center;">${index + 1}</td>
+          <td style="padding:12px;">${user.name || 'Anonymous'}</td>
+          <td style="padding:12px;text-align:center;">${user.score || 0}</td>
+          <td style="padding:12px;text-align:center;">${user.tokens || 0}</td>
+          <td style="padding:12px;text-align:center;">${user.badges || 0}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', loadLeaderboard);
+  </script>
+</body>
+</html>

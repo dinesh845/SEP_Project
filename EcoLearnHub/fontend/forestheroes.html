@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Forest Guardians 🌳</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #eef8f2;
+      color: #2a3d1b;
+    }
+    #game-container {
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+    }
+    header, footer {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    #scoreboard {
+      font-weight: bold;
+    }
+    #scene {
+      border: 2px solid #2a3d1b;
+      background: #c3e6cb;
+      position: relative;
+    }
+    canvas {
+      display: block;
+    }
+    #quiz-box {
+      margin-top: 20px;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    #choices button {
+      display: block;
+      width: 100%;
+      margin: 8px 0;
+      padding: 10px;
+      background: #4caf50;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #choices button:hover {
+      background: #45a049;
+    }
+    #next-btn {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: #ff9800;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <header>
+      <h1>Forest Guardians 🌳</h1>
+      <div id="scoreboard">
+        Eco-Coins: <span id="coins">0</span> |
+        Seeds: <span id="seeds">0</span>
+      </div>
+    </header>
+    <main>
+      <div id="scene">
+        <canvas id="forestCanvas" width="800" height="400"></canvas>
+      </div>
+      <div id="quiz-box">
+        <p id="question"></p>
+        <div id="choices"></div>
+      </div>
+      <button id="next-btn" hidden>Next</button>
+    </main>
+    <footer>
+      <p id="level-indicator">Level 1 of 3</p>
+    </footer>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('forestCanvas');
+    const ctx = canvas.getContext('2d');
+    const coinsEl = document.getElementById('coins');
+    const seedsEl = document.getElementById('seeds');
+    const questionEl = document.getElementById('question');
+    const choicesEl = document.getElementById('choices');
+    const nextBtn = document.getElementById('next-btn');
+    const levelIndicator = document.getElementById('level-indicator');
+
+    let currentLevel = 1;
+    let correctCount = 0;
+    let coins = 0;
+    let seeds = 0;
+    let qIndex = 0;
+
+    const questionBank = {
+      1: [
+        { q: 'What gas do trees absorb?', choices: ['Oxygen','Carbon Dioxide','Nitrogen'], a: 'Carbon Dioxide' },
+        { q: 'Planting trees helps reduce?', choices: ['Soil Erosion','Internet Speed','Traffic'], a: 'Soil Erosion' },
+        { q: 'Which part of tree makes food?', choices: ['Roots','Leaves','Bark'], a: 'Leaves' },
+        { q: 'Trees give us?', choices: ['Plastic','Oxygen','Metal'], a: 'Oxygen' },
+        { q: 'Which is a tree-planting day?', choices: ['World Water Day','Arbor Day','Earth Hour'], a: 'Arbor Day' }
+      ],
+      2: [
+        { q: 'Which forest type has high biodiversity?', choices: ['Rainforest','Desert','Tundra'], a: 'Rainforest' },
+        { q: 'Deforestation leads to?', choices: ['More Animals','Climate Change','Lower CO₂'], a: 'Climate Change' },
+        { q: 'Forest cover helps?', choices: ['Soil Fertility','Soundproofing','Traffic'], a: 'Soil Fertility' },
+        { q: 'What is agroforestry?', choices: ['Tree Paper','Forest Farming','Tree Cutting'], a: 'Forest Farming' },
+        { q: 'Primary cause of deforestation?', choices: ['Logging','Singing','Photography'], a: 'Logging' },
+        { q: 'Which animal lives in forests?', choices: ['Camel','Tiger','Penguin'], a: 'Tiger' },
+        { q: 'Canopy is?', choices: ['Forest Floor','Top Layer','River'], a: 'Top Layer' }
+      ],
+      3: [
+        { q: 'Endangered species of rainforest include?', choices: ['Tiger','Penguin','Polar Bear'], a: 'Tiger' },
+        { q: 'Forest restoration term is?', choices: ['Reforestation','Desertification','Urbanization'], a: 'Reforestation' },
+        { q: 'Tree rings tell?', choices: ['Age','Color','Taste'], a: 'Age' },
+        { q: 'Mangroves grow in?', choices: ['Deserts','Coasts','Mountains'], a: 'Coasts' },
+        { q: 'Which practice harms forests?', choices: ['Sustainable Logging','Slash-and-Burn','Eco-Tourism'], a: 'Slash-and-Burn' },
+        { q: 'Biodiversity means?', choices: ['One Species','Many Species','No Species'], a: 'Many Species' },
+        { q: 'Forest acts as a?', choices: ['Carbon Sink','Concrete Sink','Plastic Sink'], a: 'Carbon Sink' },
+        { q: 'Which is a rainforest layer?', choices: ['Understory','Tundra','Savanna'], a: 'Understory' },
+        { q: 'Mycorrhizae are?', choices: ['Fungi','Robots','Birds'], a: 'Fungi' },
+        { q: 'Which helps forest recovery?', choices: ['Planting Trees','Building Roads','Mining'], a: 'Planting Trees' }
+      ]
+    };
+
+    function drawScene(progress=0) {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle = '#a67e4a'; ctx.fillRect(0,300,800,100);
+      for (let i=0; i<5; i++) {
+        let x = 100 + i*130;
+        if (i < progress) {
+          ctx.fillStyle = '#4caf50'; ctx.beginPath();
+          ctx.arc(x, 280, 30, 0, Math.PI*2); ctx.fill();
+          ctx.fillStyle = '#8b4513'; ctx.fillRect(x-10,280,20,40);
+        } else {
+          ctx.fillStyle = '#8b4513'; ctx.fillRect(x-20,300,40,20);
+        }
+      }
+    }
+
+    function loadQuestion() {
+      const levelQs = questionBank[currentLevel];
+      if (qIndex >= levelQs.length) {
+        nextLevel();
+        return;
+      }
+      const { q, choices, a } = levelQs[qIndex];
+      questionEl.textContent = q;
+      choicesEl.innerHTML = '';
+      choices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.textContent = choice;
+        btn.onclick = () => checkAnswer(choice, a);
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(choice, answer) {
+      nextBtn.hidden = false;
+      if (choice === answer) {
+        coins += 10;
+        seeds += 1;
+        correctCount++;
+        drawScene(correctCount);
+      } else {
+        coins = Math.max(0, coins - 5);
+        alert('Oops! Try again on the next one.');
+      }
+      updateUI();
+      disableChoices();
+    }
+
+    function disableChoices() {
+      Array.from(choicesEl.children).forEach(btn => btn.disabled = true);
+    }
+
+    function updateUI() {
+      coinsEl.textContent = coins;
+      seedsEl.textContent = seeds;
+      levelIndicator.textContent = `Level ${currentLevel} of 3`;
+    }
+
+    function nextLevel() {
+      if (currentLevel < 3) {
+        currentLevel++;
+        qIndex = 0;
+        correctCount = 0;
+        nextBtn.hidden = true;
+        drawScene(0);
+        loadQuestion();
+      } else {
+        gameWin();
+      }
+    }
+
+    // ✅ Updated gameWin with token & badge awarding
+    function gameWin() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.font = '48px serif';
+      ctx.fillStyle = '#2a3d1b';
+      ctx.fillText('Forest Restored! 🌳💚', 200, 200);
+      questionEl.textContent = '';
+      choicesEl.innerHTML = '';
+      nextBtn.hidden = true;
+
+      // ✅ Award token & badge using dashboard function if available
+      if (typeof awardGameReward === "function") {
+        awardGameReward("Deforest Game");
+      } else {
+        // Fallback: if opened standalone, still update localStorage manually
+        let user = JSON.parse(localStorage.getItem("loggedInUser"));
+        if (user) {
+          user.tokens += 1;
+          user.badges += 1;
+          user.score += 10;
+          let allUsers = JSON.parse(localStorage.getItem("users"));
+          let idx = allUsers.findIndex(u => u.email === user.email);
+          allUsers[idx] = user;
+          localStorage.setItem("users", JSON.stringify(allUsers));
+          localStorage.setItem("loggedInUser", JSON.stringify(user));
+          alert("🎉 You completed the Deforest Game! +1 Token & Badge");
+        }
+      }
+    }
+
+    nextBtn.onclick = () => {
+      qIndex++;
+      nextBtn.hidden = true;
+      loadQuestion();
+    };
+
+    // Initialize game
+    drawScene(0);
+    loadQuestion();
+    updateUI();
+  </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+</main>
+
+<script src="js/quiz.js"></script>
+</script>
+    {q:'What is green building?',opts:['Color painted','Eco-friendly design','Expensive house','Tiny house'],a:1},
+    {q:'LED bulbs save?',opts:['Water','Electricity','Fuel','Paper'],a:1},
+    {q:'Planting trees is called?',opts:['Afforestation','Mining','Urbanization','Deforestation'],a:0},
+    {q:'Life cycle assessment measures?',opts:['Product impact','Car speed','Human age','GDP'],a:0},
+    {q:'What does ESG stand for?',opts:['Eco Social Governance','Environmental Social Governance','Economic Social Growth','Environment Saving Goals'],a:1},
+    {q:'Which is a sustainable practice?',opts:['Overfishing','Recycling','Wasting water','Deforestation'],a:1}
+  ],
+  Wildlife:[
+    {q:'Largest land carnivore?',opts:['Tiger','Polar Bear','Lion','Grizzly Bear'],a:1},
+    {q:'What is a group of dolphins called?',opts:['Pack','Pod','Flock','Herd'],a:1},
+    {q:'Fastest bird?',opts:['Ostrich','Peregrine Falcon','Eagle','Sparrow'],a:1},
+    {q:'National animal of India?',opts:['Elephant','Tiger','Peacock','Lion'],a:1},
+    {q:'Animal that can change gender?',opts:['Clownfish','Dog','Cat','Horse'],a:0},
+    {q:'Endangered species means?',opts:['Abundant','Risk of extinction','New species','Domesticated'],a:1},
+    {q:'Which mammal lays eggs?',opts:['Kangaroo','Platypus','Bat','Dolphin'],a:1},
+    {q:'Largest reptile?',opts:['Komodo dragon','Saltwater Crocodile','Anaconda','Iguana'],a:1},
+    {q:'Bird that can mimic sounds?',opts:['Parrot','Crow','Owl','Eagle'],a:0},
+    {q:'King of jungle?',opts:['Tiger','Lion','Leopard','Cheetah'],a:1}
+  ],
+  Energy:[
+    {q:'Which is a non-renewable energy source?',opts:['Wind','Solar','Natural Gas','Hydro'],a:2},
+    {q:'Photovoltaic cells are used to convert?',opts:['Heat to light','Light to electricity','Water to steam','CO2 to oxygen'],a:1},
+    {q:'Energy from Earth heat is?',opts:['Solar','Wind','Geothermal','Hydro'],a:2},
+    {q:'Which country uses most solar power?',opts:['USA','Germany','China','India'],a:2},
+    {q:'Biofuel is made from?',opts:['Plastic','Plants','Metal','Stone'],a:1},
+    {q:'Wind energy converts?',opts:['Kinetic to electrical','Heat to electrical','Sound to heat','Light to sound'],a:0},
+    {q:'Battery stores?',opts:['Heat','Electrical energy','Water','Fuel'],a:1},
+    {q:'Fossil fuels formed from?',opts:['Rocks','Ancient plants/animals','Sand','Lava'],a:1},
+    {q:'Hydropower uses?',opts:['Wind','Flowing water','Sunlight','Steam'],a:1},
+    {q:'Nuclear energy uses?',opts:['Fusion','Fission','Combustion','Evaporation'],a:1}
+  ]
+};
+
+const topicSelect=document.getElementById('topicSelect');
+const quizArea=document.getElementById('quizArea');
+const questionBox=document.getElementById('questionBox');
+const optionsBox=document.getElementById('options');
+const scoreBoard=document.getElementById('scoreBoard');
+const nextBtn=document.getElementById('nextBtn');
+const backBtn=document.getElementById('backBtn');
+let currentTopic=null, questions=[], index=0, score=0;
+
+Object.keys(TOPICS).forEach(t=>{
+  const btn=document.createElement('button');
+  btn.className='topic-btn';
+  btn.textContent=t;
+  btn.onclick=()=>startQuiz(t);
+  topicSelect.appendChild(btn);
+});
+
+function startQuiz(topic){
+  currentTopic=topic;
+  questions=[...TOPICS[topic]];
+  index=0;score=0;
+  topicSelect.style.display='none';
+  quizArea.style.display='block';
+  backBtn.style.display='inline-block';
+  loadQuestion();
+}
+
+backBtn.onclick=()=>{
+  quizArea.style.display='none';
+  topicSelect.style.display='flex';
+  backBtn.style.display='none';
+};
+
+function loadQuestion(){
+  nextBtn.style.display='none';
+  const q=questions[index];
+  questionBox.textContent=`${index+1}. ${q.q}`;
+  optionsBox.innerHTML='';
+  q.opts.forEach((opt,i)=>{
+    const div=document.createElement('div');
+    div.className='option';
+    div.textContent=opt;
+    div.onclick=()=>selectOption(div,i,q.a);
+    optionsBox.appendChild(div);
+  });
+  scoreBoard.textContent=`Score: ${score} / ${questions.length}`;
+}
+
+function selectOption(div,i,answer){
+  const all=document.querySelectorAll('.option');
+  all.forEach(o=>o.onclick=null);
+  if(i===answer){div.classList.add('correct');score++;playCorrect();}
+  else{div.classList.add('wrong');playWrong();all[answer].classList.add('correct');}
+  nextBtn.style.display='block';
+  scoreBoard.textContent=`Score: ${score} / ${questions.length}`;
+}
+
+nextBtn.onclick=()=>{
+  index++;
+  if(index<questions.length){loadQuestion();}
+  else{endQuiz();}
+};
+
+function endQuiz(){
+  questionBox.textContent=`🎉 You finished the ${currentTopic} quiz!`;
+  optionsBox.innerHTML='';
+  nextBtn.style.display='none';
+  scoreBoard.textContent=`Final Score: ${score} / ${questions.length}`;
+  launchConfetti();
+}
+
+function playCorrect(){beep(440,0.15);}function playWrong(){beep(150,0.2);}function beep(freq,duration){const ctx=new AudioContext();const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.type='sine';osc.frequency.value=freq;osc.start();gain.gain.setValueAtTime(0.15,ctx.currentTime);osc.stop(ctx.currentTime+duration);}
+
+const confettiCanvas=document.getElementById('confetti');
+const cctx=confettiCanvas.getContext('2d');
+function resizeConfetti(){confettiCanvas.width=window.innerWidth;confettiCanvas.height=window.innerHeight;}
+resizeConfetti();window.addEventListener('resize',resizeConfetti);
+let particles=[];
+function launchConfetti(){particles=[];for(let i=0;i<150;i++){particles.push({x:Math.random()*confettiCanvas.width,y:Math.random()*confettiCanvas.height - confettiCanvas.height,r:Math.random()*6+4,d:Math.random()*0.5+0.5,color:`hsl(${Math.random()*360},80%,60%)`,tilt:Math.random()*10 -10,tiltAngle:Math.random()*Math.PI});}animateConfetti();}
+function animateConfetti(){cctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);particles.forEach(p=>{p.y += p.d*4;p.tiltAngle += 0.04;p.x += Math.sin(p.tiltAngle);cctx.beginPath();cctx.lineWidth = p.r;cctx.strokeStyle = p.color;cctx.moveTo(p.x + p.tilt + p.r/2, p.y);cctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r/2);cctx.stroke();});if(particles.some(p=>p.y<confettiCanvas.height)){requestAnimationFrame(animateConfetti);}}
+</script>
+</body>
+</html>

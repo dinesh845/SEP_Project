@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Save the Blue Planet 🌊</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .game-container {
+            width: 90%;
+            max-width: 1000px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #00b894, #00a085);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .score-board {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .screen {
+            padding: 30px;
+            text-align: center;
+            display: none;
+        }
+        .screen.active {
+            display: block;
+        }
+        #start-screen h2 { color: #2d3436; margin-bottom: 20px; font-size: 2em; }
+        #start-screen p   { color: #636e72; font-size: 1.2em; margin-bottom: 30px; }
+        .level-selection { display: flex; flex-direction: column; gap: 15px; align-items: center; }
+        .level-btn {
+            padding: 15px 30px;
+            font-size: 1.3em;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 300px;
+        }
+        .level-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .water-container {
+            position: relative;
+            height: 300px;
+            margin: 20px auto;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+        .water-body { width: 100%; height: 100%; position: relative; transition: all 0.5s ease; }
+        .water-body.pond   { background: linear-gradient(to bottom, rgba(116,185,255,0.7) 0%, rgba(9,132,227,0.8) 100%); }
+        .water-body.river  { background: linear-gradient(to bottom, rgba(116,185,255,0.6) 0%, rgba(9,132,227,0.7) 100%); }
+        .water-body.ocean  { background: linear-gradient(to bottom, rgba(116,185,255,0.5) 0%, rgba(9,132,227,0.6) 100%); }
+        .water-body.clean.pond   { background: linear-gradient(to bottom, rgba(116,185,255,0.9) 0%, rgba(9,132,227,1) 100%); }
+        .water-body.clean.river  { background: linear-gradient(to bottom, rgba(116,185,255,0.8) 0%, rgba(9,132,227,0.9) 100%); }
+        .water-body.clean.ocean  { background: linear-gradient(to bottom, rgba(116,185,255,0.7) 0%, rgba(9,132,227,0.8) 100%); }
+        .fish {
+            position: absolute;
+            font-size: 2em;
+            animation: swim 3s ease-in-out infinite alternate;
+            opacity: 0.3;
+            transition: opacity 0.5s ease;
+        }
+        .fish.visible { opacity: 1; }
+        .fish.hidden  { opacity: 0.1; }
+        @keyframes swim { 0% {transform: translateX(-10px);} 100%{transform: translateX(10px);} }
+        .waste {
+            position: absolute;
+            font-size: 1.5em;
+            animation: float 2s ease-in-out infinite alternate;
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+        .waste.removed {
+            opacity: 0;
+            transform: scale(0) rotate(180deg);
+            pointer-events: none;
+        }
+        @keyframes float { 0% {transform: translateY(-5px) rotate(-5deg);} 100% {transform: translateY(5px) rotate(5deg);} }
+        .question-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: linear-gradient(135deg,#f8f9fa,#e9ecef);
+            border-radius: 15px;
+        }
+        .question h3  { color: #2d3436; font-size: 1.4em; margin-bottom: 20px; line-height: 1.6; }
+        .options { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 15px; }
+        .option-btn {
+            padding: 15px 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .option-btn:hover    { border-color: #74b9ff; transform: translateY(-2px);
+                              box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);}
+        .option-btn.correct  { background:#00b894; color:white; border-color: #00b894;}
+        .option-btn.incorrect{ background:#e17055; color:white; border-color: #e17055;}
+        .option-btn:disabled { cursor: not-allowed; opacity: 0.6; }
+        .progress        { margin-top: 20px; }
+        .progress-bar    { width:100%; height:20px; background:#ddd; border-radius:10px; overflow:hidden; margin-bottom:10px;}
+        .progress-fill   { height:100%; background:linear-gradient(135deg, #00b894,#00a085); width:0%; transition:width 0.5s ease;}
+        .progress p      { color:#636e72; font-style: italic; }
+        #win-screen, #gameover-screen { background: linear-gradient(135deg,#f8f9fa,#e9ecef); border-radius:15px; margin:20px;}
+        #win-screen h2   { color:#00b894; font-size:2.5em; margin-bottom:20px; }
+        #gameover-screen h2 { color:#e17055; font-size:2.5em; margin-bottom:20px; }
+        .final-score     { margin:20px 0; font-size:1.3em;}
+        .final-score p   { margin:10px 0; color:#2d3436; }
+        .next-btn, .restart-btn {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        .next-btn    { background:linear-gradient(135deg,#00b894,#00a085); color:white;}
+        .restart-btn { background:linear-gradient(135deg,#74b9ff,#0984e3); color:white;}
+        .next-btn:hover, .restart-btn:hover { transform:translateY(-3px); box-shadow:0 10px 20px rgba(0,0,0,0.2);}
+        @media (max-width: 768px) {
+            .game-container { width:95%; margin:10px;}
+            header h1 { font-size:2em;}
+            .score-board { flex-direction:column; gap:10px;}
+            .options { grid-template-columns:1fr;}
+            .level-btn { min-width:auto; width:100%;}
+            .water-container { height:250px;}
+        }
+        .celebrate { animation:celebrate 0.6s ease-in-out; }
+        @keyframes celebrate { 0%,100% {transform:scale(1);} 50% {transform:scale(1.05);} }
+        .shake { animation:shake 0.6s ease-in-out; }
+        @keyframes shake {
+            0%,100% {transform:translateX(0);}
+            25%     {transform:translateX(-10px);}
+            75%     {transform:translateX(10px);}
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <header>
+            <h1>🌊 Save the Blue Planet 🌊</h1>
+            <div class="score-board">
+                <div class="score">Score: <span id="score">0</span></div>
+                <div class="level">Level: <span id="level">1</span></div>
+                <div class="eco-coins">💧 <span id="coins">0</span></div>
+            </div>
+        </header>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen active">
+            <h2>Welcome to Save the Blue Planet!</h2>
+            <p>Help clean our waters by answering quiz questions correctly!</p>
+            <div class="level-selection">
+                <button class="level-btn" data-level="1">🏞️ Level 1: Clean the Pond</button>
+                <button class="level-btn" data-level="2">🏞️ Level 2: Clean the River</button>
+                <button class="level-btn" data-level="3">🌊 Level 3: Clean the Ocean</button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <div class="water-container">
+                <div id="water-body" class="water-body pond">
+                    <div class="fish" style="left: 20%; top: 60%;">🐟</div>
+                    <div class="fish" style="left: 70%; top: 40%;">🐠</div>
+                    <div class="fish hidden" style="left: 45%; top: 70%;">🐡</div>
+                </div>
+            </div>
+            <div class="question-container">
+                <div class="question">
+                    <h3 id="question-text">Question will appear here...</h3>
+                    <div class="options">
+                        <button class="option-btn" data-option="0"></button>
+                        <button class="option-btn" data-option="1"></button>
+                        <button class="option-btn" data-option="2"></button>
+                        <button class="option-btn" data-option="3"></button>
+                    </div>
+                </div>
+            </div>
+            <div class="progress">
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+                <p>Clean the water by answering correctly!</p>
+            </div>
+        </div>
+
+        <!-- Win Screen -->
+        <div id="win-screen" class="screen">
+            <h2>🎉 Congratulations! 🎉</h2>
+            <p>You've successfully cleaned the <span id="water-type">pond</span>!</p>
+            <div class="final-score">
+                <p>Final Score: <span id="final-score">0</span></p>
+                <p>Eco-Coins Earned: 💧 <span id="final-coins">0</span></p>
+            </div>
+            <button id="next-level-btn" class="next-btn">Next Level</button>
+            <button id="restart-btn" class="restart-btn">Play Again</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameover-screen" class="screen">
+            <h2>💔 Game Over 💔</h2>
+            <p>The water is too polluted! Try again to save our planet.</p>
+            <button id="try-again-btn" class="restart-btn">Try Again</button>
+        </div>
+    </div>
+    <script>
+        const allQuestions = {
+            1: [ /* Pond - easy - 10 questions */
+                {"q":"What is the main cause of water pollution in ponds?", "options":["Throwing garbage","Using fertilizers","Boiling water","Planting trees"], "answer":0},
+                {"q":"Which item pollutes water the MOST?", "options":["Plastic bottle","Paper","Leaves","Stones"], "answer":0},
+                {"q":"Which animal is most affected by polluted water?", "options":["Frogs","Cats","Cows","Butterflies"], "answer":0},
+                {"q":"How can we keep ponds clean?", "options":["Don't throw waste","Add chemicals","Dump leftover food","Catch all fish"], "answer":0},
+                {"q":"What does clean water look like?", "options":["Blue and clear","Brown and smelly","Full of bubbles","Covered in oil"], "answer":0},
+                {"q":"Which of these is NOT a pollutant?", "options":["Fresh rainwater","Plastic bag","Used batteries","Old shoes"], "answer":0},
+                {"q":"Why is plastic harmful in water?", "options":["Animals can eat it","Makes water tasty","Attracts birds","Removes smell"], "answer":0},
+                {"q":"Best way to reduce water pollution?", "options":["Throw waste in dustbins","Use more plastic","Add soap to water","Feed fish bread"], "answer":0},
+                {"q":"Pond fishes need what to survive?", "options":["Clean water","Candy","Plastic bags","Old tires"], "answer":0},
+                {"q":"Who should work to keep water clean?", "options":["Everyone","Just teachers","Only students","Fish"], "answer":0}
+            ],
+            2: [ /* River - medium - 15 questions */
+                {"q":"What is chemical runoff?", "options":["Chemicals from farms washing into rivers","Oil leaking from cars on road","Children playing in water","Rain falling in river"], "answer":0},
+                {"q":"Which waste harms river fish the most?", "options":["Oil spills","Old shoes","Food wrappers","Glass bottles"], "answer":0},
+                {"q":"What can factories do to reduce river pollution?", "options":["Treat waste before releasing","Pour chemicals directly","Ignore water quality","Close at night"], "answer":0},
+                {"q":"What happens when plastic reaches rivers?", "options":["Pollutes water and harms life","Turns to sand","Makes water sweet","Helps fish grow"], "answer":0},
+                {"q":"Best way for students to protect rivers?", "options":["Participate in clean-ups","Swim every day","Throw less paper","Fish often"], "answer":0},
+                {"q":"What is raw sewage?", "options":["Dirty water from toilets","River water","Water from clouds","Lemon juice"], "answer":0},
+                {"q":"Why should we not wash clothes in rivers?", "options":["Soap pollutes water","Because of fishes","Leaves float away","It is too cold"], "answer":0},
+                {"q":"Which river pollutant causes green algae blooms?", "options":["Fertilizers","Plastic bottles","Oil","Sand"], "answer":0},
+                {"q":"How do oil spills harm rivers?", "options":["Choke and kill aquatic animals","Make water clear","Increase oxygen","Feed plants"], "answer":0},
+                {"q":"Right way to dispose of medicines?", "options":["Return to chemist or safe disposal","Throw in river","Flush down toilet","Burn in open air"], "answer":0},
+                {"q":"What is the biggest river pollution festival problem?", "options":["Throwing offerings or idols","Firecrackers","Drumming","Flower decorations"], "answer":0},
+                {"q":"Best way to reduce single-use plastic in rivers?", "options":["Use reusable bags/bottles","Buy more plastic bags","Throw all plastic away","Burn plastic openly"], "answer":0},
+                {"q":"Who controls river safety in cities?", "options":["Local municipal authorities","Only students","Farmers","Fishermen"], "answer":0},
+                {"q":"Effect of hot water discharge by factories?", "options":["Kills fish and plants due to temperature rise","Makes river clean","Helps fish breed","No effect"], "answer":0},
+                {"q":"What is one sign of polluted river?", "options":["Bad smell and dead fish","Crystal clear water","Lots of fish and plants","Blue water"], "answer":0}
+            ],
+            3: [ /* Ocean - hard - 20 questions */
+                {"q":"What is eutrophication?", "options":["Excess nutrients causing algal blooms","Evaporation of ocean water","Fish migration","Oil extraction process"], "answer":0},
+                {"q":"What is the Great Pacific Garbage Patch?", "options":["A huge pile of ocean plastic","A coral reef","A shipwreck","A fishing area"], "answer":0},
+                {"q":"How do microplastics affect marine life?", "options":["They are eaten & harm animals","Make water clean","Help fish breathe","Sink to ocean floor"], "answer":0},
+                {"q":"Which is a major source of ocean pollution?", "options":["Unregulated shipping waste","Desalination","Salt mines","Bird droppings"], "answer":0},
+                {"q":"What is biomagnification?", "options":["Toxins increase up food chain","Growing big fish","Magnifying glass use underwater","Ocean evaporation"], "answer":0},
+                {"q":"Why is mercury dangerous in oceans?", "options":["Accumulates in fish and enters human food chain","Turns water yellow","Helps coral growth","Reduces waves"], "answer":0},
+                {"q":"Which marine animals are most threatened by plastic bags?", "options":["Sea turtles","Seagulls","Sharks","Dolphins"], "answer":0},
+                {"q":"What is ocean acidification?", "options":["Decrease in pH due to CO2 absorption","Water freezing","Increase in oxygen","Rise in tide"], "answer":0},
+                {"q":"Who is responsible for dumping most plastic in oceans?", "options":["Humans","Fish","Turtles","Crabs"], "answer":0},
+                {"q":"Why are oil spills so hard to clean in oceans?", "options":["Large area and waves spread oil","Fish remove oil quickly","Sun evaporates oil","Plastic absorbs oil"], "answer":0},
+                {"q":"Which practice helps reduce ocean pollution?", "options":["Beach clean-ups and waste management","Boating every day","Fishing at night","Throwing bottles"], "answer":0},
+                {"q":"Effect of noise pollution in oceans?", "options":["Disrupts marine animals' communication/navigation","Improves fish health","No impact","Cleans water"], "answer":0},
+                {"q":"Why is coral bleaching a concern?", "options":["Indicates dying reefs due to pollution/stress","Brightens water","Increases fish","Cleans water"], "answer":0},
+                {"q":"Source of microplastics in sea?", "options":["Broken plastic, clothes fibers, cosmetics","Sand","Oxygen","Seaweed"], "answer":0},
+                {"q":"Why should ships avoid dumping waste?", "options":["It pollutes and harms marine life","Speeds up travel","Stops waves","Cools ships"], "answer":0},
+                {"q":"What happens to aquatic birds affected by oil spills?", "options":["Lose ability to fly & often die","Swim faster","Eat more fish","Build bigger nests"], "answer":0},
+                {"q":"What's the international law to prevent marine pollution?", "options":["MARPOL Convention","Water Act","Ocean Treaty","Blue Law"], "answer":0},
+                {"q":"What is ghost fishing?", "options":["Lost nets trapping marine life","Invisible boats","Sharks hunting","Boats with no crew"], "answer":0},
+                {"q":"One major threat to coral reefs?", "options":["Runoff from land (fertilizers, chemicals)","Rainwater","Sunshine","Clean water"], "answer":0},
+                {"q":"How can everyone help reduce ocean pollution?", "options":["Reduce, reuse, recycle","Use more plastic","Drop glass in water","Boil ocean water"], "answer":0}
+            ]
+        };
+
+        let currentLevel = 1;
+        let score = 0;
+        let coins = 0;
+        let questionIndex = 0;
+        let questions = [];
+        let wasteCount = 0;
+        let wasteIDs = [
+            ['plastic-bottle', 'plastic-bag', 'oil-spill'],
+            ['plastic-bottle', 'plastic-bag', 'oil-spill', 'can'],
+            ['plastic-bottle', 'plastic-bag', 'oil-spill', 'can', 'net', 'chemical']
+        ];
+        let wasteAdded = 0;
+
+        function resetGameVars(level) {
+            currentLevel = level;
+            score = 0;
+            coins = 0;
+            questionIndex = 0;
+            questions = [...allQuestions[level]];
+            wasteCount = wasteIDs[level - 1].length;
+            wasteAdded = wasteCount;
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+        function setLevelView() {
+            const waterBody = document.getElementById('water-body');
+            waterBody.className = 'water-body';
+            if (currentLevel === 1) waterBody.classList.add('pond');
+            else if (currentLevel === 2) waterBody.classList.add('river');
+            else if (currentLevel === 3) waterBody.classList.add('ocean');
+        }
+        function setupWaterWaste() {
+            const waterBody = document.getElementById('water-body');
+            const toRemove = waterBody.querySelectorAll('.waste');
+            toRemove.forEach(w => w.remove());
+            wasteIDs[currentLevel-1].forEach((waste, idx) => {
+                let el = document.createElement('div');
+                el.className = `waste ${waste}`;
+                el.style.left = `${15 + idx*12}%`;
+                el.style.top = `${15 + idx*8}%`;
+                el.innerText = waste === 'plastic-bottle' ? '🍼'
+                    : waste === 'plastic-bag' ? '🛍️'
+                    : waste === 'oil-spill' ? '🛢️'
+                    : waste === 'can' ? '🥫'
+                    : waste === 'net' ? '🎣'
+                    : '☢️';
+                waterBody.appendChild(el);
+            });
+            waterBody.querySelectorAll('.fish').forEach(f => { f.classList.add('hidden'); });
+        }
+        function displayQuestion() {
+            if (questionIndex >= questions.length || wasteAdded <= 0) {
+                winGame();
+                return;
+            }
+            document.getElementById('score').innerText = score;
+            document.getElementById('level').innerText = currentLevel;
+            document.getElementById('coins').innerText = coins;
+            document.getElementById('progress-fill').style.width = `${((wasteIDs[currentLevel-1].length-wasteAdded)/wasteIDs[currentLevel-1].length)*100}%`;
+            let question = questions[questionIndex];
+            document.getElementById('question-text').innerText = question.q;
+            document.querySelectorAll('.option-btn').forEach((btn, idx) => {
+                btn.innerText = question.options[idx];
+                btn.className = 'option-btn';
+                btn.disabled = false;
+            });
+        }
+        function handleOption(e) {
+            let btn = e.target;
+            let selIdx = Number(btn.getAttribute('data-option'));
+            let correct = questions[questionIndex].answer === selIdx;
+            if (correct) {
+                btn.classList.add('correct');
+                score += 2;
+                coins += 1;
+                removeOneWaste();
+            } else {
+                btn.classList.add('incorrect');
+                addOneWaste();
+            }
+            document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+            setTimeout(() => {
+                questionIndex++;
+                displayQuestion();
+            }, 1100);
+        }
+        function removeOneWaste() {
+            const waterBody = document.getElementById('water-body');
+            const wasteEls = waterBody.querySelectorAll('.waste:not(.removed)');
+            if (wasteEls.length > 0) {
+                wasteEls[wasteEls.length-1].classList.add('removed');
+                wasteAdded--;
+                if (wasteAdded <= Math.ceil(wasteCount/2)) {
+                    waterBody.querySelectorAll('.fish').forEach((f,idx) => {
+                        if (idx < 2) f.classList.remove('hidden');
+                    });
+                }
+                if (wasteAdded <= 1) {
+                    waterBody.querySelectorAll('.fish').forEach(f => f.classList.remove('hidden'));
+                }
+            }
+            if (wasteAdded === 0) {
+                waterBody.classList.add('clean');
+                setTimeout(() => winGame(), 1200);
+            }
+        }
+        function addOneWaste() {
+            const waterBody = document.getElementById('water-body');
+            let el = document.createElement('div');
+            el.className = 'waste extra-waste';
+            el.style.left = `${Math.random()*70 + 10}%`;
+            el.style.top = `${Math.random()*60 + 15}%`;
+            el.innerText = '🗑️';
+            waterBody.appendChild(el);
+            wasteAdded++;
+            waterBody.classList.add('shake');
+            setTimeout(() => waterBody.classList.remove('shake'), 800);
+            if (wasteAdded > wasteCount + 3) {
+                setTimeout(() => showGameOver(), 500);
+            }
+        }
+        function winGame() {
+            showScreen('win-screen');
+            document.getElementById('water-type').innerText = ["pond", "river", "ocean"][currentLevel-1];
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-coins').innerText = coins;
+            if (currentLevel < 3) {
+                document.getElementById('next-level-btn').style.display = 'inline-block';
+            } else {
+                document.getElementById('next-level-btn').style.display = 'none';
+            }
+        }
+        function showGameOver() {
+            showScreen('gameover-screen');
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.level-btn').forEach(btn => {
+                btn.onclick = function() {
+                    resetGameVars(Number(btn.dataset.level));
+                    setLevelView();
+                    setupWaterWaste();
+                    showScreen('game-screen');
+                    displayQuestion();
+                };
+            });
+            document.querySelectorAll('.option-btn').forEach((btn, idx) => {
+                btn.setAttribute('data-option', idx);
+                btn.onclick = handleOption;
+            });
+            document.getElementById('next-level-btn').onclick = function() {
+                let next = currentLevel + 1;
+                if (next <= 3) {
+                    resetGameVars(next);
+                    setLevelView();
+                    setupWaterWaste();
+                    showScreen('game-screen');
+                    displayQuestion();
+                }
+            };
+            document.getElementById('restart-btn').onclick =
+            document.getElementById('try-again-btn').onclick = function() {
+                showScreen('start-screen');
+            };
+        });
+    </script>
+</body>
+</html>

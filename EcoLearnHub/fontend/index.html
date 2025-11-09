@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoLearn Hub</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="centered" id="auth-container">
+    <div id="auth-section" class="auth-box">
+      <h2>Login</h2>
+      <input type="email" id="loginEmail" placeholder="Enter Email">
+      <input type="password" id="loginPassword" placeholder="Enter Password">
+  <button id="loginBtn">Login</button>
+  <p>New user? <a href="#" id="showRegisterLink">Register here</a></p>
+    </div>
+
+    <div id="register-section" class="auth-box" style="display:none;">
+      <h2>Register</h2>
+      <input type="text" id="regName" placeholder="Enter Name">
+      <input type="email" id="regEmail" placeholder="Enter Email">
+      <input type="password" id="regPassword" placeholder="Enter Password">
+  <button id="registerBtn">Register</button>
+  <p>Already have an account? <a href="#" id="showLoginLink">Login here</a></p>
+    </div>
+  </div>
+
+  <div id="dashboard" style="display:none;">
+    <header class="header">
+      <nav class="navbar">
+        <div class="nav-brand"><i class="fas fa-leaf"></i><span>EcoLearn Hub</span></div>
+        <div class="nav-links">
+          <a href="#home">Home</a>
+          <a href="#features">Features</a>
+          <a href="#challenges">Challenges</a>
+          <a href="#about">About</a>
+          <a href="leaderboard.html">Leaderboard</a>
+          <a href="#" id="logoutLink">Logout</a>
+        </div>
+      </nav>
+    </header>
+
+    <section class="hero" id="home">
+      <div class="hero-content">
+        <h1>Learn. Play. Save the Planet.</h1>
+        <p>Gamified learning for eco-friendly education.</p>
+  <button class="cta-button" id="exploreBtn">
+          Explore Features
+        </button>
+      </div>
+    </section>
+
+    <section id="features">
+      <h2>Our Features</h2>
+      <div class="feature-grid">
+          <div class="card" data-page="forestheroes.html">
+          <i class="fas fa-gamepad"></i>
+          <h3>Tree game</h3>
+        </div>
+        <div>
+          <div class="card" data-page="airgame.html">
+          <i class="fas fa-seedling"></i>
+          <h3>Air Game</h3>
+          </div>
+        </div>
+  <div class="card" data-page="interactive.html">
+          <i class="fas fa-book-open"></i>
+          <h3>Interactive Learning</h3>
+        </div>
+  <div class="card" data-page="watergame2.html">
+          <i class="fas fa-gamepad"></i>
+          <h3>Water Game</h3>
+        </div>
+  <div class="card" data-page="soil.html">
+          <i class="fas fa-tree"></i>
+          <h3>Soil Game</h3>
+        </div>
+    <div class="card" data-page="savethefish.html">
+            <i class="fas fa-fish"></i>
+            <h3>Save the Fish</h3>
+          </div>
+      </div>
+    </section>
+
+    <section id="challenges">
+      <h2>Challenges</h2>
+      <div class="challenge-grid">
+  <div class="card" data-page="streak13.html">
+          <i class="fas fa-road"></i>
+          <h3>Streak Challenge</h3>
+        </div>
+        <div class="card" id="user-stats-card">
+          <i class="fas fa-coins"></i>
+          <h3>Your Progress</h3>
+          <p>Tokens: <span id="userTokens">0</span></p>
+          <p>Badges: <span id="userBadges">0</span></p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>&copy; 2025 EcoLearn Hub | Made with ❤️ for a greener tomorrow</p>
+    </footer>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
+

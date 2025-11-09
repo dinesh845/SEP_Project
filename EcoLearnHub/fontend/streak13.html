@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Streak Rewards - EcoLearn Hub</title>
+<style>
+  body { font-family: 'Segoe UI', sans-serif; background: #e8f5e9; margin:0; padding:0; display:flex; justify-content:center; align-items:center; height:100vh; }
+  .streak-container { background:#fff; padding:30px; border-radius:15px; box-shadow:0 8px 20px rgba(0,0,0,0.2); text-align:center; width:350px; }
+  h1 { color:#2c5530; margin-bottom:20px; }
+  .streak-number { font-size:4rem; color:#4caf50; margin:20px 0; transition: transform 0.3s ease; }
+  .claim-btn { background:#2e7d32; color:#fff; border:none; padding:15px 30px; border-radius:50px; cursor:pointer; font-size:1.2rem; transition: all 0.3s ease; }
+  .claim-btn:hover { background:#1b4332; transform: scale(1.05); }
+  .reward-msg { margin-top:20px; font-size:1.2rem; color:#ff6f00; font-weight:bold; min-height:30px; }
+  .milestones { display:flex; justify-content:space-between; flex-wrap:wrap; margin-top:30px; }
+  .milestone { width:60px; height:60px; border-radius:50%; background:#c8e6c9; display:flex; align-items:center; justify-content:center; margin:5px; font-weight:bold; color:#2c5530; transition: all 0.3s ease; }
+  .milestone.active { background:#4caf50; color:#fff; transform: scale(1.2); box-shadow:0 4px 10px rgba(0,0,0,0.2); }
+</style>
+</head>
+<body>
+
+<div class="streak-container">
+  <h1>Streak Rewards</h1>
+  <div class="streak-number" id="streakNumber">0</div>
+  <button class="claim-btn" id="claimBtn">Claim Active Day</button>
+  <div class="reward-msg" id="rewardMsg"></div>
+  <div class="milestones" id="milestones"></div>
+</div>
+
+<script src="js/streak13.js"></script>
+
+</body>
+</html>

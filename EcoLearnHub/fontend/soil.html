@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Soil Saviors 🌱</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f0f5f0;
+      color: #3e5d33;
+      line-height: 1.6;
+    }
+    #game-container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+    }
+    header, footer {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    #scoreboard {
+      font-weight: bold;
+    }
+    #scene {
+      border: 2px solid #3e5d33;
+      background: #d4e8d2;
+      position: relative;
+      margin-bottom: 15px;
+    }
+    canvas {
+      display: block;
+      background: #e8dab2;
+    }
+    #quiz-box {
+      margin-top: 20px;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    #choices button {
+      display: block;
+      width: 100%;
+      margin: 8px 0;
+      padding: 10px;
+      background: #8bc34a;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #choices button:hover {
+      background: #7cb342;
+    }
+    #next-btn {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: #ffb300;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .info-section {
+      background: #ffffff;
+      margin-top: 25px;
+      padding: 15px;
+      border-left: 5px solid #4caf50;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .info-section h2 {
+      color: #2e7d32;
+    }
+    ul {
+      margin: 8px 0 8px 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <header>
+      <h1>Soil Saviors 🌱</h1>
+      <div id="scoreboard">
+        Soil Tokens: <span id="tokens">0</span> |
+        Fertile Drops: <span id="drops">0</span>
+      </div>
+    </header>
+
+    <main>
+      <div id="scene">
+        <canvas id="soilCanvas" width="800" height="400"></canvas>
+      </div>
+      <div id="quiz-box">
+        <p id="question"></p>
+        <div id="choices"></div>
+      </div>
+      <button id="next-btn" hidden>Next</button>
+
+      <!-- 📘 Added Information Section -->
+      <div class="info-section">
+        <h2>🌍 Why Soil Matters?</h2>
+        <p>
+          Soil is the foundation of life on Earth. It provides nutrients to plants, filters water,
+          stores carbon, and supports biodiversity. Without healthy soil, food security and
+          ecosystems collapse.
+        </p>
+        <ul>
+          <li>Soil takes <b>hundreds of years</b> to form just a few centimeters.</li>
+          <li>It stores <b>three times more carbon</b> than the atmosphere, helping fight climate change.</li>
+          <li>Over <b>33% of the world’s soils</b> are degraded due to erosion, pollution, and poor practices.</li>
+        </ul>
+      </div>
+
+      <div class="info-section">
+        <h2>🧩 Levels in Soil Saviors</h2>
+        <p>Each level teaches you new techniques to save and improve soil:</p>
+        <ul>
+          <li><b>Level 1 – Basics:</b> Preventing erosion, composting, mulching, and soil pH knowledge.</li>
+          <li><b>Level 2 – Farming Practices:</b> Crop rotation, no-till farming, bioremediation, salinity control.</li>
+          <li><b>Level 3 – Advanced Conservation:</b> Afforestation, biochar, rain gardens, sustainable farming methods.</li>
+        </ul>
+      </div>
+
+      <div class="info-section">
+        <h2>💡 Pro Tips for Healthy Soil</h2>
+        <ul>
+          <li>Plant trees and cover crops to reduce erosion.</li>
+          <li>Add compost and organic matter to boost fertility.</li>
+          <li>Avoid over-irrigation to prevent salinization.</li>
+          <li>Rotate crops to balance nutrient use.</li>
+          <li>Support agroforestry for long-term sustainability.</li>
+        </ul>
+      </div>
+
+      <div class="info-section">
+        <h2>🎯 Game Goal</h2>
+        <p>
+          Answer questions correctly to collect <b>Soil Tokens</b> and <b>Fertile Drops</b>.
+          Each right answer helps you “heal” the soil on screen by sprouting plants 🌱.
+          Reach Level 3 and rejuvenate the soil completely!
+        </p>
+      </div>
+    </main>
+
+    <footer>
+      <p id="level-indicator">Level 1 of 3</p>
+      <p><small>🌱 Built to spread awareness about soil conservation and sustainability.</small></p>
+    </footer>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('soilCanvas');
+    const ctx = canvas.getContext('2d');
+    const tokensEl = document.getElementById('tokens');
+    const dropsEl = document.getElementById('drops');
+    const questionEl = document.getElementById('question');
+    const choicesEl = document.getElementById('choices');
+    const nextBtn = document.getElementById('next-btn');
+    const levelIndicator = document.getElementById('level-indicator');
+
+    let currentLevel = 1;
+    let correctCount = 0;
+    let tokens = 0;
+    let drops = 0;
+    let qIndex = 0;
+
+    const questionBank = {
+      1: [
+        { q: 'What practice reduces soil erosion?', choices: ['Overgrazing','Terracing','Deforestation'], a: 'Terracing' },
+        { q: 'Compost adds what to soil?', choices: ['Chemicals','Organic Matter','Plastic'], a: 'Organic Matter' },
+        { q: 'Cover crops prevent?', choices: ['Waterlogging','Weeds','Pollinators'], a: 'Weeds' },
+        { q: 'Soil pH measures?', choices: ['Acidity','Temperature','Light'], a: 'Acidity' },
+        { q: 'Mulching helps retain?', choices: ['Pests','Moisture','Wind'], a: 'Moisture' }
+      ],
+      2: [
+        { q: 'Crop rotation improves?', choices: ['Diseases','Soil Fertility','Erosion'], a: 'Soil Fertility' },
+        { q: 'No-till farming reduces?', choices: ['Yield','Erosion','Biodiversity'], a: 'Erosion' },
+        { q: 'Green manure is?', choices: ['Dead Plants','Cover Crops','Herbicide'], a: 'Cover Crops' },
+        { q: 'Salinization affects?', choices: ['Deserts','Fertile Fields','Irrigated Soil'], a: 'Irrigated Soil' },
+        { q: 'Erosion control structure?', choices: ['Dam','Contour Plow','Road'], a: 'Contour Plow' },
+        { q: 'Soil compaction stops?', choices: ['Root Growth','Water Flow','Both'], a: 'Root Growth' },
+        { q: 'Bioremediation uses?', choices: ['Fungi','Tractors','Pesticides'], a: 'Fungi' }
+      ],
+      3: [
+        { q: 'Which restores degraded land?', choices: ['Afforestation','Mining','Urbanization'], a: 'Afforestation' },
+        { q: 'Rhizosphere is?', choices: ['Root Zone','Rock Layer','Airspace'], a: 'Root Zone' },
+        { q: 'Biochar improves?', choices: ['Carbon Storage','Plastic','Metal'], a: 'Carbon Storage' },
+        { q: 'Salinity test measures?', choices: ['Salt Levels','Color','Texture'], a: 'Salt Levels' },
+        { q: 'Which reduces runoff?', choices: ['Step Banks','Concrete','Plowing'], a: 'Step Banks' },
+        { q: 'Mycorrhizae help plants by?', choices: ['Nutrient Uptake','Blocking Sunlight','Noise'], a: 'Nutrient Uptake' },
+        { q: 'Which increases porosity?', choices: ['Compaction','Tilling','Paving'], a: 'Tilling' },
+        { q: 'Rain gardens capture?', choices: ['Stormwater','Pesticides','Seeds'], a: 'Stormwater' },
+        { q: 'Which is sustainable practice?', choices: ['Slash-and-Burn','Agroforestry','Mono-cropping'], a: 'Agroforestry' },
+        { q: 'Which improves soil structure?', choices: ['Heavy Machinery','Bioturbation','Pollution'], a: 'Bioturbation' }
+      ]
+    };
+
+    function drawScene(progress=0) {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle = '#d2b48c'; ctx.fillRect(0,300,800,100);
+      for (let i=0; i<5; i++) {
+        let x = 100 + i*130;
+        if (i < progress) {
+          // Draw sprout
+          ctx.fillStyle = '#4caf50'; ctx.fillRect(x-5,290,10,-30);
+          ctx.beginPath();
+          ctx.arc(x,260,10,0,Math.PI*2);
+          ctx.fill();
+        } else {
+          // Draw cracked ground
+          ctx.strokeStyle = '#8b4513';
+          ctx.beginPath();
+          ctx.moveTo(x-10,300);
+          ctx.lineTo(x+10,285);
+          ctx.moveTo(x+10,300);
+          ctx.lineTo(x-10,285);
+          ctx.stroke();
+        }
+      }
+    }
+
+    function loadQuestion() {
+      const levelQs = questionBank[currentLevel];
+      if (qIndex >= levelQs.length) {
+        nextLevel();
+        return;
+      }
+      const { q, choices, a } = levelQs[qIndex];
+      questionEl.textContent = q;
+      choicesEl.innerHTML = '';
+      choices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.textContent = choice;
+        btn.onclick = () => checkAnswer(choice, a);
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(choice, answer) {
+      nextBtn.hidden = false;
+      if (choice === answer) {
+        tokens += 10;
+        drops += 1;
+        correctCount++;
+        drawScene(correctCount);
+      } else {
+        tokens = Math.max(0, tokens - 5);
+        alert('Incorrect. Better luck on the next one!');
+      }
+      updateUI();
+      disableChoices();
+    }
+
+    function disableChoices() {
+      Array.from(choicesEl.children).forEach(btn => btn.disabled = true);
+    }
+
+    function updateUI() {
+      tokensEl.textContent = tokens;
+      dropsEl.textContent = drops;
+      levelIndicator.textContent = `Level ${currentLevel} of 3`;
+    }
+
+    function nextLevel() {
+      if (currentLevel < 3) {
+        currentLevel++;
+        qIndex = 0;
+        correctCount = 0;
+        nextBtn.hidden = true;
+        drawScene(0);
+        loadQuestion();
+      } else {
+        gameWin();
+      }
+    }
+
+    function gameWin() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.font = '48px serif';
+      ctx.fillStyle = '#3e5d33';
+      ctx.fillText('Soil Rejuvenated! 🌱💧', 200, 200);
+      questionEl.textContent = '';
+      choicesEl.innerHTML = '';
+      nextBtn.hidden = true;
+    }
+
+    nextBtn.onclick = () => {
+      qIndex++;
+      nextBtn.hidden = true;
+      loadQuestion();
+    };
+
+    // Initialize game
+    drawScene(0);
+    loadQuestion();
+    updateUI();
+  </script>
+</body>
+</html>

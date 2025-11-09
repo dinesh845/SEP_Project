@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💧 Save Water – Clean the River</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #87CEEB, #ffffff);
+      color: #003366;
+      text-align: center;
+    }
+    #game-container {
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+    }
+    canvas {
+      background: #4da6ff;
+      display: block;
+      margin: auto;
+      border: 3px solid #003366;
+      border-radius: 12px;
+    }
+    #quiz-box {
+      margin-top: 20px;
+    }
+    #choices button {
+      display: block;
+      width: 100%;
+      margin: 8px 0;
+      padding: 10px;
+      background: #0099cc;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #choices button:hover {
+      background: #0077aa;
+    }
+    #next-btn {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: #ff9800;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <h1>💧 Save Water – Clean the River</h1>
+    <canvas id="waterCanvas" width="800" height="400"></canvas>
+    <div id="quiz-box">
+      <p id="question"></p>
+      <div id="choices"></div>
+    </div>
+    <button id="next-btn" hidden>Next</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('waterCanvas');
+    const ctx = canvas.getContext('2d');
+    const questionEl = document.getElementById('question');
+    const choicesEl = document.getElementById('choices');
+    const nextBtn = document.getElementById('next-btn');
+
+    let qIndex = 0;
+    let correctCount = 0;
+
+    const waterQuestions = [
+      { q: "Which practice saves water?", choices: ["Open Tap", "Rainwater Harvesting", "Overwatering Plants"], a: "Rainwater Harvesting" },
+      { q: "What should you fix to save water?", choices: ["Leaking Tap", "TV Remote", "Chair"], a: "Leaking Tap" },
+      { q: "Which method reduces water waste?", choices: ["Drip Irrigation", "Flood Irrigation", "None"], a: "Drip Irrigation" },
+    ];
+
+    function drawWaterScene(progress=0) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#006994';
+      ctx.fillRect(0, 300, canvas.width, 100);
+      ctx.fillStyle = '#00bfff';
+      ctx.fillRect(0, 300 - (progress * 30), canvas.width, progress * 30);
+    }
+
+    function loadQuestion() {
+      if (qIndex >= waterQuestions.length) {
+        winGame();
+        return;
+      }
+      const { q, choices, a } = waterQuestions[qIndex];
+      questionEl.textContent = q;
+      choicesEl.innerHTML = '';
+      choices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.textContent = choice;
+        btn.onclick = () => checkAnswer(choice, a);
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(choice, answer) {
+      nextBtn.hidden = false;
+      if (choice === answer) {
+        correctCount++;
+        drawWaterScene(correctCount);
+      } else {
+        alert("Oops! That's wrong. Try the next one.");
+      }
+      disableChoices();
+    }
+
+    function disableChoices() {
+      Array.from(choicesEl.children).forEach(btn => btn.disabled = true);
+    }
+
+    function winGame() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.font = '42px serif';
+      ctx.fillStyle = '#004d99';
+      ctx.fillText('💧 Water Saved! 🌊💙', 200, 200);
+
+      questionEl.textContent = '';
+      choicesEl.innerHTML = '';
+      nextBtn.hidden = true;
+
+      // ✅ Award token & badge using dashboard function if available
+      if (typeof awardGameReward === "function") {
+        awardGameReward("Water Game");
+      } else {
+        // Fallback: update localStorage if running standalone
+        let user = JSON.parse(localStorage.getItem("loggedInUser"));
+        if (user) {
+          user.tokens += 1;
+          user.badges += 1;
+          user.score += 10;
+          let allUsers = JSON.parse(localStorage.getItem("users"));
+          let idx = allUsers.findIndex(u => u.email === user.email);
+          allUsers[idx] = user;
+          localStorage.setItem("users", JSON.stringify(allUsers));
+          localStorage.setItem("loggedInUser", JSON.stringify(user));
+          alert("🎉 You completed the Water Game! +1 Token & Badge");
+        }
+      }
+    }
+
+    nextBtn.onclick = () => {
+      qIndex++;
+      nextBtn.hidden = true;
+      loadQuestion();
+    };
+
+    // Start game
+    drawWaterScene(0);
+    loadQuestion();
+  </script>
+</body>
+</html>
